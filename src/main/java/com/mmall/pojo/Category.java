@@ -86,4 +86,31 @@ public class Category {
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }
+
+
+
+    //过程:
+    /*两个set集合对象进行判断,首先得用主键重写判断哈希code和equal ,先调用hash Code 判断主键 不相同
+    //直接添加 ,相同调用equals方法 ,equals方法 不重写会判断所有键 所有键相同 它就不会加进去,反之即使主键相同 只要一个键不同 也会添加
+    不符合逻辑,所以 需要重写两个方法*/
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Category category = (Category) o;
+
+        return id != null ? id.equals(category.id) : category.id == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;//只取了 id 的哈希,而equal可以取多个元素比较(最好的方法就是把判断因子设置为一样的)
+    }
+    /*结论 : 重构 这两个方法 control + 回车
+    只比较 id 主键就可以了
+    调用顺序: 哈希code , equals
+    如果两个对象的哈希code相同它们并不一定相同 */
 }

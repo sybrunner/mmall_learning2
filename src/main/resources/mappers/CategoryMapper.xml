@@ -116,4 +116,15 @@
       update_time = now()
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <!-- 查询子节点的信息  list返回类型封装为(BaseResultMap)
+  通过include标签重用mybatis的代码段 <include refid="Base_Column_List"/>
+  表示:id, parent_id, name, status, sort_order, create_time, update_time
+  -->
+  <select id="selectCategoryChildrenByParentId" resultMap="BaseResultMap" parameterType="int">
+    select
+    <include refid="Base_Column_List"/>
+    from mmall_category
+    where parent_id = #{parentId}
+  </select>
 </mapper>

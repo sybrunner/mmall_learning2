@@ -101,7 +101,7 @@
         create_time = #{createTime,jdbcType=TIMESTAMP},
       </if>
       <if test="updateTime != null" >
-        now(),
+        update_time = now(),
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
@@ -116,4 +116,64 @@
       update_time = now()
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="selectCartByUserIdProductId" resultMap="BaseResultMap" parameterType="map">
+    SELECT
+    <include refid="Base_Column_List"/>
+    from mmall_cart
+    where user_id = #{userId}
+    and product_id = #{productId}
+  </select>
+
+  <select id="selectCartByUserId" resultMap="BaseResultMap" parameterType="int">
+    SELECT
+    <include refid="Base_Column_List"/>
+    from mmall_cart
+    where user_id = #{userId}
+  </select>
+
+  <select id="selectCartProductCheckedStatusByUserId" resultType="int" parameterType="int">
+    SELECT  count(1) from mmall_cart where checked = 0 and user_id = #{userId}
+  </select>
+
+  <delete id="deleteByUserIdProductIds" parameterType="map">
+    delete from mmall_cart
+    where user_id = #{userId}
+    <if test="productIdList != null">
+      and product_id in                          <!-- foreach遍历标签 -->
+      <foreach collection="productIdList" item="item" index="index" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+  </delete>
+
+  <!-- 四个接口使用 (全选(反) 单选(反)) -->
+  <update id="checkedOrUncheckedProduct" parameterType="map">
+    UPDATE  mmall_cart
+    set checked = #{checked},<!-- 赋值传过来的check   1表示选择  0 表示未选择 -->
+    update_time = now()
+    where user_id = #{userId}
+    <if test="productId != null">   <!-- 条件成立则是单选 或单反选 ,条件不成立作用域为 当前userID的所有product -->
+      and product_id = #{productId}
+    </if>
+  </update>
+
+  <!--   当找不到表里的userID时   sum(quantity) 返回值为空(null) 而null 不能赋值给int 类型
+         解决方法:int->integer 或者  IFNULL(sum(quantity),0)
+         IFNULL(变量1,0)  这个函数作用 如果变量1 = null,那么赋值 为0
+   -->
+
+  <select id="selectCartProductCount" parameterType="int" resultType="int">
+    select IFNULL(sum(quantity),0) as count
+    from mmall_cart where user_id = #{userId}
+  </select>
+
+  <select id="selectCheckedCartByUserId" parameterType="int" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    from mmall_cart
+    where user_id = #{userId}
+    and checked = 1
+  </select>
+
 </mapper>
